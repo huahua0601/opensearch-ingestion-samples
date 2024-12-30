@@ -1,0 +1,41 @@
+{
+    "version": "2",
+    "unaggregated-log-pipeline": {
+      "source": {
+        "http": {
+          "path": "/log/ingest"
+        }
+      },
+      "processor": [
+        {
+          "grok": {
+            "match": {
+              "log": ["%{TIMESTAMP_ISO8601:timestamp}\\s+\\|\\s+%{LOGLEVEL:level}\\s+\\|\\s+%{DATA:thread}\\s+\\|\\s+%{DATA:logger}\\s+\\|\\s+%{GREEDYDATA:message}"]
+            }
+          }
+        },
+        {
+          "date": {
+              "from_time_received": true,
+              "destination": "@timestamp"
+          }
+        }
+      ],
+      "sink": [
+        {
+          "opensearch": {
+            "hosts": [
+              "https://vpc-ingestion-test-ar3quly6s3yrh7lkvyqjqqki3q.us-east-1.es.amazonaws.com"
+            ],
+            "index": "index_name",
+            "index_type": "custom",
+            "bulk_size": 20,
+            "aws": {
+              "sts_role_arn": "arn:aws:iam::715371302281:role/osis-pipeline-role",
+              "region": "us-east-1"
+            }
+          }
+        }
+      ]
+    }
+  }
